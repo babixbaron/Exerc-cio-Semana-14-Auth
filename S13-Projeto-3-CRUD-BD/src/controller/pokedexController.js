@@ -77,9 +77,9 @@ const findAllPokemons = async (req, res) => {
   }
 }
 
-const findPokemonById = async(req, res) => {
+const findPokemonById = async (req, res) => {
   try {
-    
+
     const authHeader = req.get('authorization')
 
     if (!authHeader) {
@@ -99,35 +99,49 @@ const findPokemonById = async(req, res) => {
     })
     const findPokemon = await PokedexModel
       .findById(req.params.id).populate('coach')
-    
-     if (findPokemon == null) {
-      return res.status(404).json({ message: "pokemon não encontrado."})
-     }
 
-      res.status(200).json(findPokemon)
+    if (findPokemon == null) {
+      return res.status(404).json({ message: "pokemon não encontrado." })
+    }
+
+    res.status(200).json(findPokemon)
   } catch (error) {
-    res.status(500).json({ message: error.message})
+    res.status(500).json({ message: error.message })
   }
 }
 
-/**
- * 
- * 1. verificar se o pokemon existe [ x ]
- * 2. verificar se o coachId recebido existe
- * 3. verificar se o dado recebido é valido
- */
+
 const updatePokemonById = async (req, res) => {
   try {
+
+    const authHeader = req.get('authorization')
+
+    if (!authHeader) {
+
+      return res.status(401).send('Cadê o authorization?')
+    }
+
+    const token = authHeader.split(' ')[1]
+
+    await jwt.verify(token, SECRET, async function (error) {
+
+      if (error) {
+        return res.status(403).send('Não vai rolar')
+      }
+      const allPokemons = await PokedexModel.find().populate('coach')
+      res.status(200).json(allPokemons)
+    })
+
     const { id } = req.params
     const { coachId, name, type, abilities, description } = req.body
     const findPokemon = await PokedexModel.findById(id)
     if (findPokemon == null) {
-      return res.status(404).json({ message: "pokemon não encontrado."})
+      return res.status(404).json({ message: "pokemon não encontrado." })
     }
     if (coachId) {
       const findCoach = await CoachModel.findById(coachId)
       if (findCoach == null) {
-        return res.status(404).json({ message: 'Treinador não foi encontrado'})
+        return res.status(404).json({ message: 'Treinador não foi encontrado' })
       }
     }
     // if (name) findPokemon.name = name
