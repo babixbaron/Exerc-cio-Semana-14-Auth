@@ -53,7 +53,7 @@ const createPokemon = async (req, res) => {
 
 
 const findAllPokemons = async (req, res) => {
-   try {
+  try {
 
     const authHeader = req.get('authorization')
 
@@ -72,9 +72,9 @@ const findAllPokemons = async (req, res) => {
       const allPokemons = await PokedexModel.find().populate('coach')
       res.status(200).json(allPokemons)
     })
-   } catch (error) {
-    res.status(500).json({ message: error.message})
-   }
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
 }
 
 const findPokemonById = async(req, res) => {
