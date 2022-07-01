@@ -79,6 +79,24 @@ const findAllPokemons = async (req, res) => {
 
 const findPokemonById = async(req, res) => {
   try {
+    
+    const authHeader = req.get('authorization')
+
+    if (!authHeader) {
+
+      return res.status(401).send('Cadê o authorization?')
+    }
+
+    const token = authHeader.split(' ')[1]
+
+    await jwt.verify(token, SECRET, async function (error) {
+
+      if (error) {
+        return res.status(403).send('Não vai rolar')
+      }
+      const allPokemons = await PokedexModel.find().populate('coach')
+      res.status(200).json(allPokemons)
+    })
     const findPokemon = await PokedexModel
       .findById(req.params.id).populate('coach')
     
