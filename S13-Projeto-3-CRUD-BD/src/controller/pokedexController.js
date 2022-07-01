@@ -159,7 +159,46 @@ const updatePokemonById = async (req, res) => {
   }
 }
 
+const deletePokemonById = async (req, res) => {
+
+  try {
+
+    const authHeader = req.get('authorization')
+
+    if (!authHeader) {
+
+      return res.status(401).send('Cadê o authorization?')
+    }
+
+    const token = authHeader.split(' ')[1]
+
+    await jwt.verify(token, SECRET, async function (error) {
+
+      if (error) {
+        return res.status(403).send('Não vai rolar')
+      }
+      const allPokemons = await PokedexModel.find().populate('coach')
+      res.status(200).json(allPokemons)
+    })
+    const { id } = req.params
+    const findPokemon = await PokedexModel.findById(id)
+
+    if (findPokemon == null) {
+      return res.status(404).json({ message: `Pokemon with id: ${id} not found ` })
+
+    }
+
+    await findPokemon.remove()
+
+    res.status(200).json({ message: `Pokemon - ${findPokemon.name} - deleted succesfully` })
+
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
+}
+
+
 module.exports = {
-   createPokemon, findAllPokemons, findPokemonById, updatePokemonById
+   createPokemon, findAllPokemons, findPokemonById, updatePokemonById, deletePokemonById
 
 }
